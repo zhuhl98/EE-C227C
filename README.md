@@ -1,4 +1,4 @@
-# EEC227C
+# EE C227C
 
 
 ## Homework 1
