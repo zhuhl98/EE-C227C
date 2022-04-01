@@ -3,6 +3,7 @@ import math
 import matplotlib.pyplot as plt
 import argparse
 import cvxpy as cp
+from tqdm import trange 
 
 parser = argparse.ArgumentParser(description='Setting learning rate type')
 # parser.add_argument("-l", "--learning_rate_type",\
@@ -47,7 +48,6 @@ def f(x):
     return max([f_k(x, k) for k in range(K)])
 
 T = args.T
-l = args.l
 # C = args.C
 
 x1 = np.ones((10), dtype = float)
@@ -69,7 +69,7 @@ def norm(x):
 f_iter = [f(x1)]
 f_best = [f(x1)]
 
-# a guess for optimal f for Polyak stepsize, which is computed by (b)
+# a guess for optimal f which is computed in HW 1
 f_star_guess = -0.8414004108659314
 
 for t in range(T-1):
@@ -94,9 +94,5 @@ t_iter = np.arange(1,T+1, 1)
 plt.loglog(t_iter, f_best - np.min([f_opt, f_star_guess]))
 plt.xlabel('# of iteration')
 plt.ylabel('sub-optimality gap')
-if args.learning_rate_type == 'c/sqrt(t)':
-    plt.title('Convergence rate of C/sqrt(t)\
-         learning rate when C = {}'.format(C))
-else:
-    plt.title('Convergence rate of Polyak stepsize')
+plt.title('Convergence rate of level method for lambda = {}'.format(args.l))
 plt.show()
