@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description='Setting learning rate type')
 parser.add_argument("-l", "--L",\
       help="value of lambda", type = float, default=0.5)
 parser.add_argument("-t", "--T",\
-     help="Time steps", type = int, default=100)
+     help="Time steps", type = int, default=1000)
 args = parser.parse_args()
 # print(args.learning_rate_type)
 print(args.T)
@@ -75,13 +75,16 @@ f_plus = f(x1)
 # a guess for optimal f which is computed in HW 1
 f_star_guess = -0.8414004108659314
 
+def f_i(x):
+    return cp.max(cp.hstack(f(xj) + sub_gradient(xj) @ (x-xj) for xj in x_iter))
+   
+
 def solve_f_minus():
     x = cp.Variable(d)
     
-    # print(max([f(xj) + cp.sum(cp.multiply(sub_gradient(xj),x-xj)) for xj in x_iter]))
-    print(cp.max(cp.hstack(f(xj) + cp.sum(cp.multiply(sub_gradient(xj),x-xj)) for xj in x_iter)))
-    obj = cp.Minimize(cp.max(cp.hstack(f(xj) + cp.sum(cp.multiply(sub_gradient(xj),x-xj)) for xj in x_iter)))
-    prob = cp.Problem(obj)
+    obj = cp.Minimize(f_i(x))
+    constraints = [cp.norm(x) <= 100]
+    prob = cp.Problem(obj, constraints)
     prob.solve()
     return prob.value
 
@@ -89,12 +92,13 @@ def proj(l):
     x_old = x_iter[-1]
     x_new = cp.Variable(d)
     obj = cp.Minimize(cp.sum(cp.square(x_old - x_new)))
-    constraints = [cp.max(cp.hstack(f(xj) + cp.sum(cp.multiply(sub_gradient(xj),x-xj)) for xj in x_iter)) <= l]
+    constraints = [f_i(x_new) <= l, cp.norm(x_new) <= 100]
     try:
         prob = cp.Problem(obj, constraints)
         prob.solve()
     except:
         return x_old
+
     return x_new.value
 
 for t in trange(T-1, desc="level method", unit="sec"):
